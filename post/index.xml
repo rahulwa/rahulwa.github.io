@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Rahul Sinha</title>
-    <link>https://rahulwa.com/</link>
-    <description>Recent content on Rahul Sinha</description>
+    <title>Posts on Rahul Sinha</title>
+    <link>https://rahulwa.com/post/</link>
+    <description>Recent content in Posts on Rahul Sinha</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 20 Aug 2017 16:57:56 +0530</lastBuildDate>
     
-	<atom:link href="https://rahulwa.com/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://rahulwa.com/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
