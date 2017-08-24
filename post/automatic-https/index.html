@@ -36,10 +36,10 @@
       <article>
         
 
-<p>For automatic HTTPS for any website, we need two things:</p>
+<p>To include automatic HTTPS for any website, we need to have two things in place:</p>
 
 <ol>
-<li>Trusted <strong>Certificate Authority</strong> that support automatic verification and provisioning of SSL certificate.</li>
+<li>A trusted <strong>Certificate Authority</strong> that support automatic verification and provisioning of SSL certificate.</li>
 <li>A <strong>web-server/reverse-proxy</strong> that can automatically obtain the SSL certificate from above CA(s) and configure it.</li>
 </ol>
 
@@ -49,32 +49,32 @@
 <p>Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit.</p>
 </blockquote>
 
-<p>Let&rsquo;s Encrypt is a Linux Foundation project and is supported by lot of big organisation like Mozilla, Chrome, Cisco, Facebook etc. Recently Let&rsquo;s Encrypt crossed the milestone of issuing 100 Million certificates. Let&rsquo;s Encrypt is also working on <a href="https://github.com/ietf-wg-acme/acme/">IETF RFC</a> for standardising Automatic Certificate Management Environment (ACME) protocol.</p>
+<p>Let’s Encrypt is a Linux Foundation project and is supported by lot of big organisation like Mozilla, Chrome, Cisco, Facebook etc. Recently Let’s Encrypt crossed the milestone of issuing 100 Million certificates. Let’s Encrypt is also working on <a href="https://github.com/ietf-wg-acme/acme/">IETF RFC</a> for standardising Automatic Certificate Management Environment (ACME) protocol.</p>
 
-<p>Second requirement, can be fulfilled by many web servers. But here we&rsquo;ll be only talking about Caddy and Traefik. Also, there is a dedicated <a href="https://github.com/icing/mod_md">module</a> available for apache httpd server for this.</p>
+<p>The second requirement can be fulfilled by a variety of web servers. But here we’ll be only talking about two in particular - Caddy and Traefik. We also have a dedicated <a href="https://github.com/icing/mod_md">module</a> for the Apache httpd server that serves the purspose.</p>
 
-<p>There are two popular ways to accomplishing this task:</p>
+<p>There are two popular ways to complete this task:</p>
 
 <ul>
 <li>Traditional: Specifying domains in configuration for which HTTPS certificates needs to be configured and served.</li>
-<li>On-Demand TLS: Instead of specifying the domains in the config, we can use of On-Demand feature. It can obtain a certificate during the first TLS handshake for a site/hostname that does not yet have a certificate, and reuse it afterwards.</li>
+<li>On-Demand TLS: Instead of specifying the domains in the config, we can make use of the On-Demand feature. It allows you to obtain a certificate during the first TLS handshake for a site/hostname that doesn&rsquo;t have a certificate as of yet, and reuse it afterwards.</li>
 </ul>
 
 <h3 id="caddy-https-caddyserver-com"><a href="https://caddyserver.com/">Caddy</a></h3>
 
-<p>From the official page of <a href="https://caddyserver.com/">Caddy</a>:</p>
+<p>From the official page of Caddy:</p>
 
 <blockquote>
 <p>Fast, cross-platform HTTP/2 web server with automatic HTTPS.</p>
 </blockquote>
 
-<p>Caddy has many <a href="https://caddyserver.com/features">builtin features</a> like static files, dynamic sites, simple configuration, zero-downtime reloads, extensible core, automatic TLS and a lot more. Caddy received a <a href="https://blog.mozilla.org/blog/2016/06/22/mozilla-awards-385000-to-open-source-projects-as-part-of-moss-mission-partners-program/">grant from Mozilla</a> for awesome work. A <a href="https://www.cncf.io/">cncf</a> project <a href="https://coredns.io/">CoreDNS</a> started as <a href="https://coredns.io/2017/02/23/history-of-coredns-in-four-posts/">Caddy middleware</a> shows it&rsquo;s powerful extensibility. Caddy also has very friendly and active <a href="https://caddy.community/">community</a>.</p>
+<p>Caddy has many <a href="https://caddyserver.com/features">built in features</a> like static files, dynamic sites, simple configuration, zero-downtime reloads, extensible core, automatic TLS and a lot more. Caddy even received a <a href="https://blog.mozilla.org/blog/2016/06/22/mozilla-awards-385000-to-open-source-projects-as-part-of-moss-mission-partners-program/">grant from Mozilla</a> to help them continue the awesome work that they do. A <a href="https://www.cncf.io/">cncf</a> project, <a href="https://coredns.io/">CoreDNS</a> that started out as <a href="https://coredns.io/2017/02/23/history-of-coredns-in-four-posts/">Caddy middleware</a> shows it’s powerful extensibility. And to top it all, Caddy also has very friendly and active <a href="https://caddy.community/">community</a>.</p>
 
-<p>Follow <a href="https://caddyserver.com/tutorial">this excellent</a> guide to get started. Caddy is <a href="https://caddyserver.com/blog/caddy-0_8_2-released.html">the first web server</a> that does On-Demand TLS.</p>
+<p>Follow <a href="https://caddyserver.com/tutorial">this excellent</a> guide to get started. Caddy is the first web server that does On-Demand TLS.</p>
 
-<p>Create an user for Caddy, a directory for storing SSL certificate and for Caddyfile, file for logging:</p>
+<p>Creating a user for Caddy, a directory for storing SSL certificate and for Caddyfile, file for logging:</p>
 
-<pre><code>sudo useradd -md /var/log/caddy -s /sbin/nologin caddy
+<pre><code class="language-sh">sudo useradd -md /var/log/caddy -s /sbin/nologin caddy
 sudo mkdir -p /etc/ssl/caddy
 sudo chown -R caddy. /etc/ssl/caddy
 sudo mkdir /etc/caddy
@@ -104,8 +104,7 @@ sudo chown caddy. /var/log/caddy/caddy.log
 }
 </code></pre>
 
-<p>This <code>Caddyfile</code> shows a configuration for using Caddy as a reverse proxy. It uses <code>proxy</code>, <code>tls</code>, <code>log</code> and <code>prometheus</code> middlewares. Prometheus middleware doesn&rsquo;t come integrated with Caddy binary and hence needs to specified at the time of download.
-It will instruct Caddy to listens on port on 80 and 443 for any incoming connection and forward all requests transparently to specified destination(<code>backend.example.com</code>). <code>tls email</code> will enable the Let&rsquo;s Encrypt support. <code>log</code> middleware enables logging of each( with <code>/</code>) or selected requests. <code>prometheus</code> middleware exposes Caddy metrics on configured port (<code>9180</code>) and it can be consumed by <a href="https://prometheus.io/">Prometheus Server</a> for monitoring and alerting.</p>
+<p>This <code>Caddyfile</code> shows a configuration for using Caddy as a reverse proxy. It uses <code>proxy</code>, <code>tls</code>, <code>log</code> and <code>prometheus</code> middlewares. Prometheus middleware doesn’t come integrated with Caddy binary and hence needs to be specified at the time of download. It will instruct Caddy to listen in on ports 80 and 443 for any incoming connection and forward all requests transparently to specified destination (<code>backend.example.com</code>). <code>tls email</code> is responsible for enabling Let’s Encrypt support. log middleware enables logging of each (with /) or selected requests. <code>prometheus</code> middleware exposes Caddy metrics on configured port (9180) and it can be consumed by <a href="https://prometheus.io/">Prometheus Server</a> for monitoring and alerting.</p>
 
 <p>Use this systemd init script to manage caddy process by saving it as <code>/etc/systemd/system/caddy.service</code> file:</p>
 
@@ -144,7 +143,7 @@ WantedBy=multi-user.target
 
 <p>Start Caddy server by:</p>
 
-<pre><code>sudo systemctl daemon-reload
+<pre><code class="language-sh">sudo systemctl daemon-reload
 sudo systemctl start caddy.service
 </code></pre>
 
@@ -156,20 +155,21 @@ sudo systemctl start caddy.service
 <p>Træfik (pronounced like traffic) is a modern HTTP reverse proxy and load balancer made to deploy microservices with ease. It supports several backends (Docker, Swarm, Kubernetes, Marathon, Mesos, Consul, Etcd, Zookeeper, BoltDB, Eureka, Amazon DynamoDB, Rest API, file…) to manage its configuration automatically and dynamically.</p>
 </blockquote>
 
-<p>Traefik supports both ways of <a href="https://docs.traefik.io/toml/#acme-lets-encrypt-configuration">automatic HTTPS</a>, Traditional and On-Demand TLS.
-Traefik has excellent <a href="https://docs.traefik.io/basics/">starting guide</a>, <a href="https://docs.traefik.io/toml/">configuration guide</a>, <a href="https://docs.traefik.io/user-guide/examples/">examples</a> and key-value database integration with <a href="https://docs.traefik.io/user-guide/kv-config/">trafik configuration</a> for configuration on fly.</p>
+<p>Traefik supports both ways of <a href="https://docs.traefik.io/toml/#acme-lets-encrypt-configuration">automatic HTTPS</a>, Traditional and On-Demand TLS.</p>
+
+<p>Traefik has excellent <a href="https://docs.traefik.io/basics/">starting guide</a>, <a href="https://docs.traefik.io/toml/">configuration guide</a>, <a href="https://docs.traefik.io/user-guide/examples/">examples</a> and key-value database integration with <a href="https://docs.traefik.io/user-guide/kv-config/">trafik configuration</a> for configuration on fly.</p>
 
 <p>Traefik can be broken into three major parts:</p>
 
 <ol>
-<li>Entrypoint: This defines where Traefik will listens and whether to do SSL termination or not.</li>
+<li>Entrypoint: This defines the point where Traefik will continously listen in on and decide whether to perform an SSL termination or not.</li>
 <li>Frontend: It consists of a set of rules that determine how incoming requests are forwarded from an entrypoint to a backend.</li>
-<li>Backend: It is responsible to load-balance the traffic coming from one or more frontends to a set of http servers.</li>
+<li>Backend: It is responsible for load-balancing the traffic that comes in from one or more frontends to a set of http servers.</li>
 </ol>
 
-<p>We can directly use Traefik with a file backend to serve as a single point of source for Traefik configuarion and update it using API calls. We can also use any supported key-value database to store configuration. The latter one has an advantage of being able to update a key and instaneously it will get reloaded by Traefik.</p>
+<p>We can directly use Traefik with a file backend to serve as a single point of source for Traefik configuarion and update it using API calls. We can also use any supported key-value database to store configuration information. The latter has an important advantage of being able to update a key and instaneously be reloaded by Traefik.</p>
 
-<p>For now we will be suing consul as key-value store for Traefik. Consul can be <a href="https://www.consul.io/downloads.html">download from here</a>. We are going to run Consul on single node, so we will be using <code>bootstrap</code> mode of Consul. Below is the Consul configuartion, saved as a json file <code>consul.json</code>.</p>
+<p>For now we will be using consul as key-value store for Traefik. Consul can be <a href="https://www.consul.io/downloads.html">download from here</a>. We are going to run Consul on a single node and hence it&rsquo;s fine to just use the <code>bootstrap</code> mode of Consul. Given below is the Consul configuartion, saved as a json file <code>consul.json</code>.</p>
 
 <pre><code>{
   &quot;datacenter&quot;: &quot;aws-west&quot;,
@@ -185,8 +185,7 @@ Traefik has excellent <a href="https://docs.traefik.io/basics/">starting guide</
 }
 </code></pre>
 
-<p>Create a data directory for Consul:
-<code>mkdir /opt/consul</code></p>
+<p>Create a data directory for Consul: <code>sudo mkdir /opt/consul</code></p>
 
 <p>Use this file to create systemd init script for Consul by saving this file as <code>/etc/systemd/system/consul.service</code>.</p>
 
@@ -206,14 +205,13 @@ WantedBy=multi-user.target
 
 <p>Start Consul server:</p>
 
-<pre><code>sudo systemctl daemon-reload
+<pre><code class="language-sh">sudo systemctl daemon-reload
 sudo systemctl start consul
 </code></pre>
 
-<p>Now, lets get back to Traefik. Create an directory for logs of traefik:
-<code>mkdir -p /var/log/traefik</code></p>
+<p>Now, lets get back to Traefik. Create a directory for logs of traefik: <code>sudo mkdir -p /var/log/traefik</code></p>
 
-<p>This is the main consul configuration. It defines logging, default entrypoints, ACME (Let&rsquo;s Encrypt setup for automatic HTTPS), web (an endpoint for API calls and site) and Consul setup configuration. In the <code>ACME</code> part, note that <code>OnDemand</code> flips the switch for On-Demand SSL and <code>OnHostRule</code> can be used for serving HTTPS for selective domains determined by a frontend rule like <code>rule = &quot;Host:https-site.example.com&quot;</code> for enabling HTTPS for <code>https-site.exapmle.com</code>.</p>
+<p>This is the main consul configuration. It defines logging, default entrypoints, ACME (Let’s Encrypt setup for automatic HTTPS), web (an endpoint for API calls and site) and Consul setup configuration. For <code>ACME</code>, note that <code>OnDemand</code> flips the switch for On-Demand SSL and <code>OnHostRule</code> can be used for serving HTTPS for selective domains determined by a frontend rule like <code>rule = &quot;Host:https-site.example.com&quot;</code> for enabling HTTPS for <code>https-site.exapmle.com</code>.</p>
 
 <pre><code>traefikLogsFile = &quot;/var/log/traefik/traefik.log&quot;
 accessLogsFile = &quot;/var/log/traefik/access.log&quot;
@@ -264,14 +262,13 @@ WantedBy=default.target
 
 <p>Start traefik:</p>
 
-<pre><code>sudo systemctl daemon-reload
+<pre><code class="language-sh">sudo systemctl daemon-reload
 sudo systemctl start traefik
 </code></pre>
 
-<p>The static Traefik configuration in a key-value store can be automatically created and updated, using the <code>storeconfig</code> subcommand.
-<code>sudo /PATH/TO/BINARY/traefik --configfile=/PATH/TO/traefik.toml storeconfig</code></p>
+<p>The static Traefik configuration in a key-value store can be automatically created and updated, using the storeconfig subcommand. <code>sudo /PATH/TO/BINARY/traefik --configfile=/PATH/TO/traefik.toml</code> storeconfig</p>
 
-<p>Below API calls send kay-value to Consul for storing it. Note that, all keys are starting with <code>traefik</code> keyword as we already configured Traefik to watch for any keys that starts with this keyword.</p>
+<p>The API given below calls and sends key-value to Consul for storing it. Note that, all keys start with the <code>traefik</code> keyword as we have already configured Traefik to watch for any keys that start with this keyword.</p>
 
 <pre><code>curl -X PUT \
   http://CONSUL_IP:8500/v1/kv/traefik/backends/backend1/servers/server1/url \
@@ -298,7 +295,7 @@ curl -X PUT \
   -d 10
 </code></pre>
 
-<p>These configures traefik to route any HTTP and HTTPS request for <code>app.example.com</code> to backend server <code>backend.example.com</code>, automatically getting HTTPS certificate from Let&rsquo;s Encrypt and storing on specified key on Consul because of <code>OnHostRule</code> is true in <code>ACME</code> configuration. We can verify this by querying Traefik API as:</p>
+<p>This configures traefik to route any HTTP and HTTPS request for <code>app.example.com</code> to the backend server <code>backend.example.com</code>, automatically getting the HTTPS certificate from Let’s Encrypt and storing it on the specified key on Consul due to <code>OnHostRule</code> being set to true in the <code>ACME</code> configuration. We can verify this by querying Traefik API as:</p>
 
 <pre><code>curl -X GET \
   http://TRAEFIK_IP:8080/api
