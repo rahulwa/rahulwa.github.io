@@ -86,6 +86,7 @@ sudo chown caddy. /var/log/caddy/caddy.log
 <p>Save this Caddyfile as <code>/etc/caddy/Caddyfile</code> file.</p>
 
 <pre><code>:80 :443 {
+
   proxy / http://backend.example.com {
       transparent
   }
@@ -190,7 +191,10 @@ sudo systemctl start caddy.service
 }
 </code></pre>
 
-<p>Create a data directory for Consul: <code>sudo mkdir /opt/consul</code></p>
+<p>Create a data directory for Consul:</p>
+
+<pre><code class="language-sh">sudo mkdir /opt/consul
+</code></pre>
 
 <p>Use this file to create systemd init script for Consul by saving this file as <code>/etc/systemd/system/consul.service</code>.</p>
 
