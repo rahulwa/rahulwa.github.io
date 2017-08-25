@@ -89,6 +89,11 @@ sudo chown caddy. /var/log/caddy/caddy.log
   proxy / http://backend.example.com {
       transparent
   }
+  # redirect to HTTPS
+  redir 301 {
+    if {scheme} not https
+    / https://{host}{uri}
+  }
   tls on
   tls user@example.com
   tls {
@@ -104,7 +109,7 @@ sudo chown caddy. /var/log/caddy/caddy.log
 }
 </code></pre>
 
-<p>This <code>Caddyfile</code> shows a configuration for using Caddy as a reverse proxy. It uses <code>proxy</code>, <code>tls</code>, <code>log</code> and <code>prometheus</code> middlewares. Prometheus middleware doesn’t come integrated with Caddy binary and hence needs to be specified at the time of download. It will instruct Caddy to listen in on ports 80 and 443 for any incoming connection and forward all requests transparently to specified destination (<code>backend.example.com</code>). <code>tls email</code> is responsible for enabling Let’s Encrypt support. log middleware enables logging of each (with /) or selected requests. <code>prometheus</code> middleware exposes Caddy metrics on configured port (9180) and it can be consumed by <a href="https://prometheus.io/">Prometheus Server</a> for monitoring and alerting.</p>
+<p>This <code>Caddyfile</code> shows a configuration for using Caddy as a reverse proxy. It uses <code>proxy</code>, <code>tls</code>, <code>log</code>, <code>redir</code> and <code>prometheus</code> middlewares. Prometheus middleware doesn’t come integrated with Caddy binary and hence needs to be specified at the time of download. It will instruct Caddy to listen in on ports 80 and 443 for any incoming connection and forward all requests transparently to specified destination (<code>backend.example.com</code>) with redirection to HTTPS first if request is not HTTPS. <code>tls email</code> is responsible for enabling Let’s Encrypt support. log middleware enables logging of each (with /) or selected requests. <code>prometheus</code> middleware exposes Caddy metrics on configured port (9180) and it can be consumed by <a href="https://prometheus.io/">Prometheus Server</a> for monitoring and alerting.</p>
 
 <p>Use this systemd init script to manage caddy process by saving it as <code>/etc/systemd/system/caddy.service</code> file:</p>
 
