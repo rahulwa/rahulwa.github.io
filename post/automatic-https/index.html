@@ -218,7 +218,10 @@ WantedBy=multi-user.target
 sudo systemctl start consul
 </code></pre>
 
-<p>Now, lets get back to Traefik. Create a directory for logs of traefik: <code>sudo mkdir -p /var/log/traefik</code></p>
+<p>Now, lets get back to Traefik. Create a directory for logs of traefik:</p>
+
+<pre><code class="language-sh">sudo mkdir -p /var/log/traefik
+</code></pre>
 
 <p>This is the main consul configuration. It defines logging, default entrypoints, ACME (Let’s Encrypt setup for automatic HTTPS), web (an endpoint for API calls and site) and Consul setup configuration. For <code>ACME</code>, note that <code>OnDemand</code> flips the switch for On-Demand SSL and <code>OnHostRule</code> can be used for serving HTTPS for selective domains determined by a frontend rule like <code>rule = &quot;Host:https-site.example.com&quot;</code> for enabling HTTPS for <code>https-site.exapmle.com</code>.</p>
 
