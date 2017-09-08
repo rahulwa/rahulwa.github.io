@@ -4,6 +4,12 @@ date: 2017-09-06T18:09:42+05:30
 draft: fasle
 ---
 
+<details>
+ <summary>*Setting up monitoring for Machine, Application, and URLs.*</summary>
+  Using [prometheus](https://github.com/prometheus/prometheus/), [node_exporter](https://github.com/prometheus/node_exporter), [blackbox_exporter](https://github.com/prometheus/blackbox_exporter), [alertmanager](https://github.com/prometheus/alertmanager) and [grafana](https://github.com/grafana/grafana) for monitoring systems in non-containerized world.
+</details>
+<!--more-->
+
 ##### What to expect from Monitoring System
 A Monitoring system gathers data from systems, store them for later viewing and trigger any alerts for unexpected behaviours/errors. As you can see, it requires four major parts:
 
