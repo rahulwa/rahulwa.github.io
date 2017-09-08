@@ -17,8 +17,11 @@
       <pubDate>Wed, 06 Sep 2017 18:09:42 +0530</pubDate>
       
       <guid>https://rahulwa.com/post/monitoring-using-prometheus/</guid>
-      <description>What to expect from Monitoring System A Monitoring system gathers data from systems, store them for later viewing and trigger any alerts for unexpected behaviours/errors. As you can see, it requires four major parts:
- Gathering component for accumulating data from various systems Storage component for storing gathered data for future use Viewing component for getting information from stored data Alerting component for processing the stored data and triggering alerts based on certain conditions  Introduction to Prometheus Prometheus is almost a complete monitoring tool, it has all four major components as briefed earlier.</description>
+      <description>&lt;p&gt;&lt;details&gt;
+ &lt;summary&gt;&lt;em&gt;Setting up monitoring for Machine, Application, and URLs.&lt;/em&gt;&lt;/summary&gt;
+  Using &lt;a href=&#34;https://github.com/prometheus/prometheus/&#34;&gt;prometheus&lt;/a&gt;, &lt;a href=&#34;https://github.com/prometheus/node_exporter&#34;&gt;node_exporter&lt;/a&gt;, &lt;a href=&#34;https://github.com/prometheus/blackbox_exporter&#34;&gt;blackbox_exporter&lt;/a&gt;, &lt;a href=&#34;https://github.com/prometheus/alertmanager&#34;&gt;alertmanager&lt;/a&gt; and &lt;a href=&#34;https://github.com/grafana/grafana&#34;&gt;grafana&lt;/a&gt; for monitoring systems in non-containerized world.
+&lt;/details&gt;
+&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -27,9 +30,11 @@
       <pubDate>Sun, 20 Aug 2017 16:57:56 +0530</pubDate>
       
       <guid>https://rahulwa.com/post/automatic-https/</guid>
-      <description>To include automatic HTTPS for any website, we need to have two things in place:
- A trusted Certificate Authority that support automatic verification and provisioning of SSL certificate. A web-server/reverse-proxy that can automatically obtain the SSL certificate from above CA(s) and configure it.  Let&amp;rsquo;s Encrypt is the perfect solution for the first requirement. Quoting from their official site:
- Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit.</description>
+      <description>&lt;p&gt;&lt;details&gt;
+ &lt;summary&gt;&lt;em&gt;Setup HTTPS for any site with no hassle (Automatic!) with &lt;a href=&#34;https://caddyserver.com/&#34;&gt;Caddy&lt;/a&gt; or &lt;a href=&#34;https://traefik.io/&#34;&gt;Traefik&lt;/a&gt;.&lt;/em&gt;&lt;/summary&gt;
+ Introductory blogpost about setting up HTTPS for any site with Let&amp;rsquo;s Encrypt and modern webserver(like Caddy/Traefik).
+&lt;/details&gt;
+&lt;/p&gt;</description>
     </item>
     
   </channel>
