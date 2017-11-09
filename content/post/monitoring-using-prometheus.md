@@ -58,7 +58,7 @@ Monitoring Server requires below five components, each component can be on the s
 5. `alertmanager`
 
 ###### Download and Install all above components
-Download `prometheus`, `node_exporter`, `blackbox_exporter` and `grafana` from [here](https://prometheus.io/download/).
+Download `prometheus` 1.x, `node_exporter`, `blackbox_exporter` and `grafana` from [here](https://prometheus.io/download/).
 
 Now untar and extract binary from each downloaded file to `/usr/local/bin/`.
 
@@ -273,7 +273,7 @@ sudo systemctl status alertmanager --no-pager
 
 Now you can access an alertmanager dashboard on default 9093 port.
 
-###### Configuring `prometheus`
+###### Configuring `prometheus` 1.x
 `prometheus` is the main daemon that will interact with others(`alertmanager`,`blackbox_exporter`,`node_exporter`) to make an intergated monitoring solution. Lets start by configuring alert trigger rules. This file configures pretty generic alert rules, tune it according to your needs.
 
 ```
