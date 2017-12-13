@@ -3,6 +3,7 @@ languageCode = "en-us"
 title = "Rahul Sinha"
 theme = "paperback"
 googleAnalytics = "UA-105014915-1"
+disqusShortname = "rahulwa"
 
 [params]
 AuthorName = "Rahul Sinha"
