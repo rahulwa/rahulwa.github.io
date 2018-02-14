@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Rahul Sinha">
-  <meta name="generator" content="Hugo 0.31.1" />
+  <meta name="generator" content="Hugo 0.36" />
   <title>Monitoring Using Prometheus — Rahul Sinha</title>
 
   <meta name="description" content="">
@@ -356,7 +356,7 @@ ALERT Disk_USAGE_Thresold_Exceeded
   }
 
  ALERT Disk_Will_Fill_In_2_Hours
-  IF predict_linear(node_filesystem_free{fstype!~&quot;rootfs|tmpfs|fuse.lxcfs&quot;, job='aws'}[1h], 1*3600) &lt; 0
+  IF predict_linear(node_filesystem_free{fstype!~&quot;rootfs|tmpfs|fuse.lxcfs&quot;, job='aws'}[1h], 2*3600) &lt; 0
   FOR 20m
   LABELS { severity = &quot;warning&quot; }
   ANNOTATIONS {
@@ -555,7 +555,7 @@ Now you can configure graphs/dashboards as per your need. But for getting starte
       </p>
 
       <footer class="site-footer">
-  <span class="owner">©2017 Rahul Sinha</span>
+  <span class="owner">©2018 Rahul Sinha</span>
 
   
 </footer>
