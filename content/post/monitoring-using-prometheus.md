@@ -306,7 +306,7 @@ ALERT Disk_USAGE_Thresold_Exceeded
   }
 
  ALERT Disk_Will_Fill_In_2_Hours
-  IF predict_linear(node_filesystem_free{fstype!~"rootfs|tmpfs|fuse.lxcfs", job='aws'}[1h], 1*3600) < 0
+  IF predict_linear(node_filesystem_free{fstype!~"rootfs|tmpfs|fuse.lxcfs", job='aws'}[1h], 2*3600) < 0
   FOR 20m
   LABELS { severity = "warning" }
   ANNOTATIONS {
