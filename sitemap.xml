@@ -3,11 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://rahulwa.com/post/journey_of_an_ops_guy_to_microservice/</loc>
-    <lastmod>2019-07-07T07:07:07+05:30</lastmod>
-  </url>
-  
-  <url>
     <loc>https://rahulwa.com/post/monitoring-using-prometheus/</loc>
     <lastmod>2017-09-06T18:09:42+05:30</lastmod>
   </url>
@@ -24,13 +19,13 @@
   
   <url>
     <loc>https://rahulwa.com/post/</loc>
-    <lastmod>2019-07-07T07:07:07+05:30</lastmod>
+    <lastmod>2017-09-06T18:09:42+05:30</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://rahulwa.com/</loc>
-    <lastmod>2019-07-07T07:07:07+05:30</lastmod>
+    <lastmod>2017-09-06T18:09:42+05:30</lastmod>
     <priority>0</priority>
   </url>
   
