@@ -45,7 +45,10 @@
 
 
       <article>
-        
+        <p><details>
+ <summary><em>Setting up monitoring for Machine, Application, and URLs.</em></summary>
+  Using <a href="https://github.com/prometheus/prometheus/">prometheus</a>, <a href="https://github.com/prometheus/node_exporter">node_exporter</a>, <a href="https://github.com/prometheus/blackbox_exporter">blackbox_exporter</a>, <a href="https://github.com/prometheus/alertmanager">alertmanager</a> and <a href="https://github.com/grafana/grafana">grafana</a> for monitoring systems in non-containerized world.
+</details></p>
 
 <h5 id="what-to-expect-from-monitoring-system">What to expect from Monitoring System</h5>
 
@@ -110,7 +113,7 @@
 
 <h6 id="download-and-install-all-above-components">Download and Install all above components</h6>
 
-<p>Download <code>prometheus</code>, <code>node_exporter</code>, <code>blackbox_exporter</code> and <code>grafana</code> from <a href="https://prometheus.io/download/">here</a>.</p>
+<p>Download <code>prometheus</code> 1.x, <code>node_exporter</code>, <code>blackbox_exporter</code> and <code>grafana</code> from <a href="https://prometheus.io/download/">here</a>.</p>
 
 <p>Now untar and extract binary from each downloaded file to <code>/usr/local/bin/</code>.</p>
 
@@ -319,7 +322,7 @@ sudo systemctl status alertmanager --no-pager
 
 <p>Now you can access an alertmanager dashboard on default 9093 port.</p>
 
-<h6 id="configuring-prometheus">Configuring <code>prometheus</code></h6>
+<h6 id="configuring-prometheus-1-x">Configuring <code>prometheus</code> 1.x</h6>
 
 <p><code>prometheus</code> is the main daemon that will interact with others(<code>alertmanager</code>,<code>blackbox_exporter</code>,<code>node_exporter</code>) to make an intergated monitoring solution. Lets start by configuring alert trigger rules. This file configures pretty generic alert rules, tune it according to your needs.</p>
 
@@ -352,7 +355,7 @@ ALERT Disk_USAGE_Thresold_Exceeded
   }
 
  ALERT Disk_Will_Fill_In_2_Hours
-  IF predict_linear(node_filesystem_free{fstype!~&quot;rootfs|tmpfs|fuse.lxcfs&quot;, job='aws'}[1h], 1*3600) &lt; 0
+  IF predict_linear(node_filesystem_free{fstype!~&quot;rootfs|tmpfs|fuse.lxcfs&quot;, job='aws'}[1h], 2*3600) &lt; 0
   FOR 20m
   LABELS { severity = &quot;warning&quot; }
   ANNOTATIONS {
@@ -525,11 +528,29 @@ Now you can configure graphs/dashboards as per your need. But for getting starte
 </ul>
 
 <p>These two dashboards are excellent for visualizing <code>node_exporter</code> metrics. You can find out more pre-made dashboards <a href="https://grafana.com/dashboards">at here</a>.</p>
-
       </article>
 
       <p>
-        
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "rahulwa" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
       </p>
 
       <footer class="site-footer">
