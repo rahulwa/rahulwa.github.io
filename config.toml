@@ -1,0 +1,11 @@
+baseURL = "https://rahulwa.com/"
+languageCode = "en-us"
+title = "Rahul Sinha"
+theme = "paperback"
+googleAnalytics = "UA-105014915-1"
+
+[params]
+AuthorName = "Rahul Sinha"
+HomepagePosts = 3
+GithubUsername = "rahulwa"
+TwitterUsername = "rahulwa_"

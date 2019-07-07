@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rahul Sinha</title>
+    <link>https://rahulwa.com/</link>
+    <description>Recent content on Rahul Sinha</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 07 Jul 2019 07:07:07 +0530</lastBuildDate>
+    
+	<atom:link href="https://rahulwa.com/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Journey of an Ops guy from Monolithic to Microservice</title>
+      <link>https://rahulwa.com/post/journey_of_an_ops_guy_to_microservice/</link>
+      <pubDate>Sun, 07 Jul 2019 07:07:07 +0530</pubDate>
+      
+      <guid>https://rahulwa.com/post/journey_of_an_ops_guy_to_microservice/</guid>
+      <description>&lt;p&gt;&lt;details&gt;
+ &lt;summary&gt;This is story of my journey at &lt;a href=&#34;https://synup.com&#34;&gt;Synup&lt;/a&gt;, an awesome little startup (Now it’s getting big!) where i learned tremendously and i guess i truly transformed from Ops guy to a DevOps.&lt;/summary&gt;
+ This blogpost talks about how to handle Ops stack in era of Microservices, just scratchs the surface.
+&lt;/details&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Monitoring Using Prometheus</title>
+      <link>https://rahulwa.com/post/monitoring-using-prometheus/</link>
+      <pubDate>Wed, 06 Sep 2017 18:09:42 +0530</pubDate>
+      
+      <guid>https://rahulwa.com/post/monitoring-using-prometheus/</guid>
+      <description>&lt;p&gt;&lt;details&gt;
+ &lt;summary&gt;&lt;em&gt;Setting up monitoring for Machine, Application, and URLs.&lt;/em&gt;&lt;/summary&gt;
+  Using &lt;a href=&#34;https://github.com/prometheus/prometheus/&#34;&gt;prometheus&lt;/a&gt;, &lt;a href=&#34;https://github.com/prometheus/node_exporter&#34;&gt;node_exporter&lt;/a&gt;, &lt;a href=&#34;https://github.com/prometheus/blackbox_exporter&#34;&gt;blackbox_exporter&lt;/a&gt;, &lt;a href=&#34;https://github.com/prometheus/alertmanager&#34;&gt;alertmanager&lt;/a&gt; and &lt;a href=&#34;https://github.com/grafana/grafana&#34;&gt;grafana&lt;/a&gt; for monitoring systems in non-containerized world.
+&lt;/details&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Automatic Https</title>
+      <link>https://rahulwa.com/post/automatic-https/</link>
+      <pubDate>Sun, 20 Aug 2017 16:57:56 +0530</pubDate>
+      
+      <guid>https://rahulwa.com/post/automatic-https/</guid>
+      <description>&lt;p&gt;&lt;details&gt;
+ &lt;summary&gt;&lt;em&gt;Setup HTTPS for any site with no hassle (Automatic!) with &lt;a href=&#34;https://caddyserver.com/&#34;&gt;Caddy&lt;/a&gt; or &lt;a href=&#34;https://traefik.io/&#34;&gt;Traefik&lt;/a&gt;.&lt;/em&gt;&lt;/summary&gt;
+ Introductory blogpost about setting up HTTPS for any site with Let&amp;rsquo;s Encrypt and modern webserver(like Caddy/Traefik).
+&lt;/details&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
