@@ -55,10 +55,8 @@
           <h2><a href="https://rahulwa.com/post/monitoring-using-prometheus/">Monitoring Using Prometheus</a></h2>
 <div>
   
-    <p><details>
- <summary><em>Setting up monitoring for Machine, Application, and URLs.</em></summary>
-  Using <a href="https://github.com/prometheus/prometheus/">prometheus</a>, <a href="https://github.com/prometheus/node_exporter">node_exporter</a>, <a href="https://github.com/prometheus/blackbox_exporter">blackbox_exporter</a>, <a href="https://github.com/prometheus/alertmanager">alertmanager</a> and <a href="https://github.com/grafana/grafana">grafana</a> for monitoring systems in non-containerized world.
-</details></p>
+    What to expect from Monitoring System A Monitoring system gathers data from systems, store them for later viewing and trigger any alerts for unexpected behaviours/errors. As you can see, it requires four major parts:
+ Gathering component for accumulating data from various systems Storage component for storing gathered data for future use Viewing component for getting information from stored data Alerting component for processing the stored data and triggering alerts based on certain conditions  Introduction to Prometheus Prometheus is almost a complete monitoring tool, it has all four major components as briefed earlier.
 
     <footer>
       <a href="https://rahulwa.com/post/monitoring-using-prometheus/">Read more</a>
@@ -72,10 +70,9 @@
           <h2><a href="https://rahulwa.com/post/automatic-https/">Automatic Https</a></h2>
 <div>
   
-    <p><details>
- <summary><em>Setup HTTPS for any site with no hassle (Automatic!) with <a href="https://caddyserver.com/">Caddy</a> or <a href="https://traefik.io/">Traefik</a>.</em></summary>
- Introductory blogpost about setting up HTTPS for any site with Let&rsquo;s Encrypt and modern webserver(like Caddy/Traefik).
-</details></p>
+    To include automatic HTTPS for any website, we need to have two things in place:
+ A trusted Certificate Authority that support automatic verification and provisioning of SSL certificate. A web-server/reverse-proxy that can automatically obtain the SSL certificate from above CA(s) and configure it.  Let&rsquo;s Encrypt is the perfect solution for the first requirement. Quoting from their official site:
+ Let’s Encrypt is a free, automated, and open certificate authority (CA), run for the public’s benefit.
 
     <footer>
       <a href="https://rahulwa.com/post/automatic-https/">Read more</a>
