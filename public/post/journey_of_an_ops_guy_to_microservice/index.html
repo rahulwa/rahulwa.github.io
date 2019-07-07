@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Rahul Sinha">
+  <meta name="generator" content="Hugo 0.54.0" />
+  <title>Journey of an Ops guy from Monolithic to Microservice — Rahul Sinha</title>
+
+  <meta name="description" content="">
+  <link rel="canonical" href="https://rahulwa.com/post/journey_of_an_ops_guy_to_microservice/">
+  <link href="" rel="alternate" type="application/rss+xml" title="Rahul Sinha">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Arvo:400,700">
+  <link rel="stylesheet" href="https://rahulwa.com/css/highlight.css">
+  <link rel="stylesheet" href="https://rahulwa.com/css/paperback.css">
+</head>
+
+
+  <body>
+    <div class="container">
+      <nav class="site-nav">
+  <a href="https://rahulwa.com/">Home</a>
+  <a href="https://rahulwa.com/post/">All posts</a>
+
+  
+  <a href="https://twitter.com/rahulwa_">Twitter</a>
+
+  
+  <a href="http://github.com/rahulwa">GitHub</a>
+
+</nav>
+
+      <header>
+  <h1>Journey of an Ops guy from Monolithic to Microservice</h1>
+
+  
+  <time datetime="2019-07-07 07:07:07 &#43;0530 IST">2019/07/07</time>
+  
+
+  
+</header>
+
+
+      <article>
+        <p><details>
+ <summary>This is story of my journey at <a href="https://synup.com">Synup</a>, an awesome little startup (Now it’s getting big!) where i learned tremendously and i guess i truly transformed from Ops guy to a DevOps.</summary>
+ This blogpost talks about how to handle Ops stack in era of Microservices, just scratchs the surface.
+</details></p>
+
+<blockquote>
+<p>When these transformations started in <a href="https://synup.com">Synup</a>, i was only DevOps/Ops guy so i got my hands dirty in almost everything. Note: I merely handle the Ops part, i am not expert on anything else and did not handle any other part like business logic. My Manager <a href="https://hashnuke.com">Akash</a> handled the all things as director of Engineering at <a href="https://synup.com">Synup</a>. He formulated all plans of how to carry out these transformations and helped me a lot.</p>
+</blockquote>
+
+<p>In this blog, i want to explore what happened in this journey of Monolithic to Microservice through Ops perceptive (as you guessed!, i am an Ops guy). We will start our journey with why we want microservice and then will look at how Ops stack changed from this decision. I want to keep blog post as much as short i can. For deep i will open-sourcing some tools that i made along the way.
+So without further a due, let start…</p>
+
+<p><strong>Why Microservice?</strong></p>
+
+<p>I am not going to argue here that why it’s bad or good but all it boils down to scale (according to me 😜 ).  When i say scale, there are two things. first scaling of your application/product to serve more customer and second is increasing team size working on it so more feature can be added fast. And to solve both of these scaling, you somehow move to Microservice architecture. (If you wanna scale your product or application, you need to break big applications(Monolithic) into individual scalable services (Microservice) so that it can scale easily and also smooth the burden of maintaining or adding a feature to it.)</p>
+
+<p>Now let’s say that you started said journey, what you done, somehow you will create many individual services/projects with clear responsibility. Naturally it will create many codebases and now you need to make decision how you want to organise these codebases, something like monorepo or individual repo.
+We went with monorepo for easily collaboration between different codebases like one pulll-request can make changes for different services if required, great idea by <a href="https://hashnuke.com/">Akash</a>. And this decision lead to write some wonderful tooling (more on this later) and easily enforcement of some conventions. I will actually show the example monorepo with the tooling we build that simplified our lives.</p>
+
+<p><strong>Requirement of new Ops Stack as arised from these microservices</strong></p>
+
+<p>So let’s say that due to variety of reasons you wanna move to microservices from monolithic, how as an Ops person you gonna handle it. You need to figure out how to host these microservices, not to get lost in it and give developers some consistent environment across these microservices. So due to these things, many old things/tools get thrown out of window like hosting/maintaning these services on individual servers, non-automated infrastructure setup, packaging/distributing these services with each’s language tooling etc.
+Seeing these problems, you pretty much realise that you need some kind of magical system like orchestrator that works across above limitations to which you give microservice through well defined structure and it’s just runs it. One such an orchestrator engine is Kubernetes that takes input as bunch of yaml of desired state of services and maintain it. But i am not here to talk about Kubernetes, maybe in another blogs 😆.</p>
+
+<h3 id="app-configuration-in-microservice-architecture">App Configuration in Microservice architecture</h3>
+
+<p>But quickly enough i realised that configuration part of microservices has to be aligned with whatever i am planning for Ops stack. Here by configuration i mean values needed by these services to run properly like database URI to which database to connect to and etc. I am big proponent of <a href="https://12factor.net/">12 factor App</a> and it suggests that configuration values should not in codebase. Simply putting when you make tarball/container-image of application, you should be able to run it on any environment (like from staging to production) with providing different values to these configuration. Secret management is also part of this problem.</p>
+
+<p>As an Ops guy, i was trying to have one unified system for all services and without a consistent Configuration standard for all services, it was very hard goal. Big part of any applicatin configuration system is to provide management of needed values between different environment (from development to staging to production). Development and Production environment are relatively simple as you want to run app with mostly single configuration for each. On development, mostly each service will run locally on developer’s machine and he/she will have complete authority for configuration of it and mostly dependent services are also going to be running locally like database, Redis etc. Production is also simple as all services wants to be run as one global configuration and you probably never wants to run multiple configurations for them, simply putting on production one application will one set of configuration values. But staging environment on the other hand is the beast, here you want to run multiple configurations of services. Let’s say that simultaneously many features is getting worked on for a service and QA team wants to tests these feature at the same time also. This arises the situation of hosting multiple instance of this service with isolation with one other on single staging environment. And you want to define a configuration system that can handle these situations with the breeze. As you can see, this situation needs to handled by both sides from Ops and dev.</p>
+
+<p>At <a href="https://synup.com">Synup</a>, we decided to use consul&rsquo;s key-value store for config management (as we were already using Consul for service discovery and distributed locks). Choosing Consul did solve the problem of config being hardcoded in application and secret management but did not solve the above described problem and problem of consistency. So we decided to write a wrapper library for each language on top of Consul API for these. I suggested to use directory structure for solving of the problem of staging and implement these standards in Consul wrapper library so that services did not worry about internal details. We decided to use following directory for service configuration home.</p>
+
+<pre><code>/SERVICE_NAME/ENVIRONMENT/SOME_RANDOM_STRING
+</code></pre>
+
+<p>like: <code>/app/staging/main</code>.
+For more more information look at <strong><a href="https://github.com/rahulwa/ji/tree/master/consul_pyconfig">https://github.com/rahulwa/ji/tree/master/consul_pyconfig</a></strong>, it is wrapper library in python for facilitating these implementations and supports overwrite values with environment variables.</p>
+
+<h3 id="deployment-in-microservice-architecture">Deployment in Microservice architecture</h3>
+
+<p>Deployment can vastly be simplified/standardised for microservices using Kubernetes. Kubernetes can be daunting and it is not a PaaS (platform as a service) solution out of the box.
+You need to setup lot of things before you can start hosting production application on it like ingress setup, how you gonna deploy application, logging for application, monitoring of application/cluster and etc (though we are not going to talk about these things except deployment).</p>
+
+<p>In <a href="https://synup.com">Synup</a>, we adapted <a href="https://helm.sh/">helm chart</a> for deployment config, but why? As you start writing deployment for application in <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment">plain yaml</a>, pretty soon you will realise need for templating engine that can do variable assignment, conditions, looping and etc. Helm solves these problems and also gives <a href="https://helm.sh/docs/developing_charts/#the-chart-file-structure">standard structure</a> to deployment package, about how they should be organised.
+We created a <code>charts</code> subfolder in every service and put deployment config there, it gave us git committed deployment scripts and which is bundled with application (awesome, right!!). It’s great but it doesn’t give you one command for deployment, still you need to make image of your application and push it somewhere and then trigger <code>helm upgrade</code>  with these config. Here comes a simple tool that does specifically this task, <a href="https://github.com/GoogleContainerTools/skaffold">skaffold</a>, basically it build docker image of your application then does <code>kubectl apply</code> /<code>helm upgrade</code> to deploy it. So you deployment command becomes one command:  <code>skaffold run -f skaffold-production.yml</code>.</p>
+
+<p>Great, we got one command for deployment but it doesn’t provide seemless experience as for checking logs we need to run different set of commands, for restarting/config-reload of application we need to do completely different set of commands etc. I did not see this problem but my manager <a href="https://hashnuke.com">Akash</a> pointed it out and suggested to write a script that gives a simple commands for doing basic stuffs. It generated a tool called <code>ji</code> which is simple bash script organised using <a href="https://github.com/basecamp/sub">sub</a>. Monorepo style helps us to achieve this without much hassle as ji and other services code live in same repo so ji knows about the location of these codebases with simple relative path. General command looks like:</p>
+
+<pre><code>ji &lt;action&gt; &lt;environment&gt; &lt;services&gt; &lt;prefix_string&gt;
+</code></pre>
+
+<p>where <em>action</em> can be up/down/log/logs/restart/reload, <em>environment</em> can be production/staging/local and <em>prefix_string</em> can be any string. let&rsquo;s see it in action, run it full screen as terminal is getting truncated. <script id="asciicast-255857" src="https://asciinema.org/a/255857.js" async></script>
+Now let’s talk about what basic tasks it supports and how.</p>
+
+<pre><code class="language-sh">ji up staging foo main
+</code></pre>
+
+<p>which is going to deploy <code>foo</code> service on staging with a name <code>main-foo</code>, here it can be easily deploy second instance of same application on staging as <code>ji up staging foo other</code>. <code>ji up</code> is for deploying the application. It <code>cd</code> into service’s charts directory and runs <code>skaffold-&lt;environments&gt;.yaml</code> file with some validation and exports <code>COMPONENT_PREFIX</code> with value of <code>&lt;prefix_string&gt;</code> needed by helm chart to decide which key-value folder on Consul to connect to get config for this service. So config directory on Consul <code>/SERVICE_NAME/ENVIRONMENT/&lt;SOME_RANDOM_STRING&gt;</code>&rsquo;s <code>SOME_RANDOM_STRING</code> becomes <code>prefix_string</code> on ji deployment.</p>
+
+<pre><code class="language-sh">ji attach staging foo main
+</code></pre>
+
+<p>attaches to container&rsquo;s terminal running though dialog selection for <code>main-foo</code> helm application.</p>
+
+<pre><code class="language-sh">ji logs staging foo main
+</code></pre>
+
+<p>tails the logs of all pods for all k8s deployments with <code>main-foo</code> name prefix.</p>
+
+<pre><code class="language-sh">ji log staging foo main
+</code></pre>
+
+<p>tails the logs of all pods for a particular k8s deployment through a selection menu for <code>main-foo</code> helm application.</p>
+
+<pre><code class="language-sh">ji restart staging foo main
+</code></pre>
+
+<p>is going to kill all pods with name prefix <code>main-foo</code> and Kubernetes will spawn new ones in-place of these, like restart. It’s hard restart.</p>
+
+<pre><code class="language-sh">ji reload staging foo main
+</code></pre>
+
+<p>is going to update all k8s deployment objects with a random environment variable and it will trigger rolling deployment of existing deployment. It’s a soft restart in the sense that application will not be down at any particular point of time.</p>
+
+<pre><code class="language-sh">ji info staging foo main
+</code></pre>
+
+<p>will print the current status of deployed foo application with main prefix (<code>main-foo</code> helm application).</p>
+
+<pre><code class="language-sh">ji down staging foo main
+</code></pre>
+
+<p>will uninstall <code>main-foo</code> helm application.</p>
+
+<p>For more info, you can look at <strong><a href="https://github.com/rahulwa/ji/tree/master/ji">https://github.com/rahulwa/ji/tree/master/ji</a></strong>.</p>
+      </article>
+
+      <p>
+        <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "rahulwa" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      </p>
+
+      <footer class="site-footer">
+  <span class="owner">©2019 Rahul Sinha</span>
+
+  
+</footer>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-105014915-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+
+
+
+    </div>
+
+  
+<script src="https://rahulwa.com/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+  </body>
+</html>

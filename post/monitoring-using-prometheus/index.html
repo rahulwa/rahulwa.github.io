@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="Rahul Sinha">
+  <meta name="generator" content="Hugo 0.36" />
+  <title>Monitoring Using Prometheus — Rahul Sinha</title>
+
+  <meta name="description" content="">
+  <link rel="canonical" href="https://rahulwa.com/post/monitoring-using-prometheus/">
+  <link href="" rel="alternate" type="application/rss+xml" title="Rahul Sinha">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Arvo:400,700">
+  <link rel="stylesheet" href="https://rahulwa.com/css/highlight.css">
+  <link rel="stylesheet" href="https://rahulwa.com/css/paperback.css">
+</head>
+
+
+  <body>
+    <div class="container">
+      <nav class="site-nav">
+  <a href="https://rahulwa.com/">Home</a>
+  <a href="https://rahulwa.com/post/">All posts</a>
+
+  
+  <a href="https://twitter.com/rahulwa_">Twitter</a>
+
+  
+  <a href="http://github.com/rahulwa">GitHub</a>
+
+</nav>
+
+      <header>
+  <h1>Monitoring Using Prometheus</h1>
+
+  
+  <time datetime="2017-09-06 18:09:42 &#43;0530 IST">2017/09/06</time>
+  
+
+  
+</header>
+
+
+      <article>
+        <p><details>
+ <summary><em>Setting up monitoring for Machine, Application, and URLs.</em></summary>
+  Using <a href="https://github.com/prometheus/prometheus/">prometheus</a>, <a href="https://github.com/prometheus/node_exporter">node_exporter</a>, <a href="https://github.com/prometheus/blackbox_exporter">blackbox_exporter</a>, <a href="https://github.com/prometheus/alertmanager">alertmanager</a> and <a href="https://github.com/grafana/grafana">grafana</a> for monitoring systems in non-containerized world.
+</details>
+</p>
+
+<h5 id="what-to-expect-from-monitoring-system">What to expect from Monitoring System</h5>
+
+<p>A Monitoring system gathers data from systems, store them for later viewing and trigger any alerts for unexpected behaviours/errors. As you can see, it requires four major parts:</p>
+
+<ol>
+<li>Gathering component for accumulating data from various systems</li>
+<li>Storage component for storing gathered data for future use</li>
+<li>Viewing component for getting information from stored data</li>
+<li>Alerting component for processing the stored data and triggering alerts based on certain conditions</li>
+</ol>
+
+<h5 id="introduction-to-prometheus">Introduction to Prometheus</h5>
+
+<p><a href="https://prometheus.io/">Prometheus</a> is almost a complete monitoring tool, it has all four major components as briefed earlier. Below are the daemons used by these four components.</p>
+
+<ol>
+<li>Gathering component  - <code>*_exporter</code>s ,  <code>prometheus</code></li>
+<li>Storage component    - <code>prometheus</code></li>
+<li>Viewing component    - <code>prometheus</code>&rsquo;s web UI/API , <code>graphana</code></li>
+<li>Alerting component   - <code>prometheus</code> , <code>alertmanager</code></li>
+</ol>
+
+<h6 id="gathering-component-in-prometheus-how-to-gather-data-metrics-on-prometheus">Gathering component in Prometheus (How to gather data/metrics on Prometheus)</h6>
+
+<p>Prometheus uses <a href="https://prometheus.io/docs/introduction/faq/#why-do-you-pull-rather-than-push?">pull based model</a> to gather metrics. What it does is that the main monitoring daemon will fetch metrics from the target systems that we want to monitor. The target system will run an agent that exposes the health metrics as a HTTP endpoint on the system, which would be scraped by <code>prometheus</code> daemon on specific time interval.</p>
+
+<p>But it raises one problem. You need to specify every endpoint on <code>prometheus</code> daemon that you want to monitor. It can be a very tedious task if those endpoints are dynamically changing because of auto scaling or Kubernetes. Prometheus solves this problem by adding service discovery in <code>prometheus</code> daemon and this service discovery can gather endpoints from various cloud infrastructures(aws, azure, gce), Kubernetes and more.</p>
+
+<p>Now lets focus on agents that will run on each monitored system. These are called <code>exporter</code> in Prometheus. Here is a <a href="https://prometheus.io/docs/instrumenting/exporters/">list</a> of exporters available for different applications. Two in-house exporters from Prometheus are worhty of introduction:</p>
+
+<ul>
+<li><code>node_exporter</code> exposes OS and hardware level metrics like memory, cpu, network, disk utilizations and more. This exporter is perfect for monitoring to find out if a given machine is up or not.</li>
+<li><code>blackbox_exporter</code> exposes DNS, HTTP, HTTPS, DNS, TCP and ICMP level metrics. This exporter is perfect for monitoring to find out if a given site/endpoint is up or not.</li>
+</ul>
+
+<h6 id="storage-component-in-prometheus">Storage component in Prometheus</h6>
+
+<p>Prometheus has inbuilt timeseries database to store metrics.</p>
+
+<h6 id="viewing-component-in-prometheus">Viewing component in Prometheus</h6>
+
+<p>Prometheus provides inbuilt web UI for visualising stored value.</p>
+
+<p>Still most users prefer to use <a href="https://grafana.com/">Graphana</a>. Grafana is a very powerful and already has community shared dashboards for many exporters. Prometheus provides very powerful query language for fetching data to support the same.</p>
+
+<h6 id="alerting-component-in-prometheus">Alerting component in Prometheus</h6>
+
+<p>You can use <a href="https://prometheus.io/docs/querying/basics/">Prometheus&rsquo;s expression language</a> to create alert rules for error/unexpected state in <code>prometheus</code> daemon to trigger <code>alertmanager</code> daemon for further action.  <code>alertmanager</code> daemon then picks this data and triggers alert through email, Slack, Telegram, Pagerduty etc. It has many features like clubbing similar alerts, snooze, silent, labelling alerts and many more.</p>
+
+<h5 id="making-monitor-server">Making Monitor Server</h5>
+
+<p>Monitoring Server requires below five components, each component can be on the same machine or different ones:</p>
+
+<ol>
+<li><code>prometheus</code></li>
+<li><code>node_exporter</code></li>
+<li><code>blackbox_exporter</code></li>
+<li><code>grafana</code></li>
+<li><code>alertmanager</code></li>
+</ol>
+
+<h6 id="download-and-install-all-above-components">Download and Install all above components</h6>
+
+<p>Download <code>prometheus</code> 1.x, <code>node_exporter</code>, <code>blackbox_exporter</code> and <code>grafana</code> from <a href="https://prometheus.io/download/">here</a>.</p>
+
+<p>Now untar and extract binary from each downloaded file to <code>/usr/local/bin/</code>.</p>
+
+<pre><code class="language-sh">tar -xvzf prometheus-*.tar.gz -C /usr/local/bin --wildcards --no-anchored 'prometheus' --strip 1
+tar -xvzf alertmanager-*.tar.gz -C /usr/local/bin --wildcards --no-anchored 'alertmanager' --strip 1
+tar -xvzf node_exporter-*.tar.gz -C /usr/local/bin --wildcards --no-anchored 'node_exporter' --strip 1
+tar -xvzf blackbox_exporter-*.tar.gz -C /usr/local/bin --wildcards --no-anchored 'blackbox_exporter' --strip 1
+</code></pre>
+
+<p>Download <code>grafana</code> from <a href="https://grafana.com/grafana/download">here</a>. Install it using package manager (like on Ubuntu):</p>
+
+<pre><code class="language-sh">sudo dpkg -i /opt/grafana_*.deb
+</code></pre>
+
+<ul>
+<li>As its dangerous to run any program as root, create a non-root user</li>
+</ul>
+
+<pre><code class="language-sh">sudo adduser --shell /bin/nologin --no-create-home --disabled-login --gecos &quot;Prometheus Monitoring User&quot; prometheus
+</code></pre>
+
+<ul>
+<li>Create a directory to put configuration file</li>
+</ul>
+
+<pre><code class="language-sh">sudo mkdir /etc/prometheus
+</code></pre>
+
+<h6 id="configuring-node-exporter">Configuring <code>node_exporter</code></h6>
+
+<p>This file configures <code>node_exporter</code> to make OS level metric stats available on 9100(default) port. <code>node_exporter</code> server will be started and managed by systemd. Create the <code>node_exporter</code> systemd unit file:</p>
+
+<pre><code class="language-sh">cat &gt; node_exporter.service &lt;&lt;EOF
+[Unit]
+Description=Prometheus node exporter
+After=network.target auditd.service
+
+[Service]
+User=prometheus
+ExecStart=/usr/local/bin/node_exporter -collector.diskstats.ignored-devices=&quot;^(ram|loop|fd)\d+$&quot; -collectors.enabled=&quot;diskstats,filesystem,loadavg,meminfo,stat,textfile,time,netdev&quot; --collectors.enabled=&quot;conntrack,diskstats,entropy,filefd,filesystem,hwmon,loadavg,mdadm,meminfo,netdev,netstat,sockstat,stat,textfile,time,uname,vmstat,systemd&quot;
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+EOF
+</code></pre>
+
+<p>Move it to the systemd system directory:</p>
+
+<pre><code class="language-sh">sudo mv node_exporter.service /etc/systemd/system/
+</code></pre>
+
+<p>Now enable and start it.</p>
+
+<pre><code class="language-sh">sudo systemctl daemon-reload
+sudo systemctl enable node_exporter
+sudo systemctl start node_exporter
+sudo systemctl status node_exporter --no-pager
+</code></pre>
+
+<h6 id="configuring-blackbox-exporter">Configuring <code>blackbox_exporter</code></h6>
+
+<p>This blackbox configuration file sets up the simplest HTTP monitoring. It will check returned status for URLs and raise error if it&rsquo;s not 2xx status.</p>
+
+<pre><code class="language-sh">cat &gt; blackbox.yml &lt;&lt;EOF
+modules:
+  http_200_module:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: []          # Defaults to 2xx
+      method: GET
+      no_follow_redirects: false
+      fail_if_ssl: false
+      fail_if_not_ssl: false
+      tls_config:
+        insecure_skip_verify: false
+      protocol: &quot;tcp&quot;                 # accepts &quot;tcp/tcp4/tcp6&quot;, defaults to &quot;tcp&quot;
+      preferred_ip_protocol: &quot;ip4&quot;    # used for &quot;tcp&quot;, defaults to &quot;ip6&quot;
+EOF
+
+sudo mv balckbox.yml /etc/prometheus/
+</code></pre>
+
+<p><code>blackbox_exporter</code> server will be started and managed by systemd. Create the <code>blackbox_exporter</code> systemd unit file and move it to the systemd system directory:</p>
+
+<pre><code class="language-sh">cat &gt; blackbox_exporter.service &lt;&lt;EOF
+[Unit]
+Description=Prometheus blackbox exporter
+After=network.target auditd.service
+
+[Service]
+User=prometheus
+ExecStart=/usr/local/bin/blackbox_exporter -config.file=/etc/prometheus/blackbox.yml
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+EOF
+
+sudo mv blackbox_exporter.service /etc/systemd/system/
+</code></pre>
+
+<p>Now enable and start it.</p>
+
+<pre><code class="language-sh">sudo systemctl daemon-reload
+sudo systemctl enable blackbox_exporter
+sudo systemctl start blackbox_exporter
+sudo systemctl status blackbox_exporter --no-pager
+</code></pre>
+
+<h6 id="configuring-alertmanager">Configuring <code>alertmanager</code></h6>
+
+<p>This alertmanager configuration sends notification to different teams using email and slack based on the alert’s severity level. You can customize this configuration to fit your needs. The <code>alertname</code> used in this file like <code>CPU_Threshold_Exceeded</code> are setup from <code>prometheus</code>.</p>
+
+<pre><code>cat &gt; alertmanager.yml &lt;&lt;EOF
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@example.com'
+  smtp_auth_username: 'alerts@example.com'
+  smtp_auth_password: 'xxxxx'
+  # auth for Slack
+  slack_api_url: 'https://hooks.slack.com/services/xxx/xxx/xxx'
+# The directory from which notification templates are read.
+templates:
+- '/etc/alertmanager/template/*.tmpl'
+# The root route on which each incoming alert enters.
+route:
+  group_by: ['alertname', 'cluster', 'service']   # The labels by which incoming alerts are grouped together.
+  group_wait: 30s                                 # When a new group of alerts is created by an incoming alert, it waits at least this much to send the initial notification.
+  group_interval: 5m                              # When the first notification was sent, wait until 'group_interval' to send a batch of new alerts that started firing for that group.
+  repeat_interval: 5h                             # If an alert has successfully been sent, wait until 'repeat_interval' to resend them.
+  receiver: 'slack_alerts_channel'                # A default receiver
+  routes:                                         # This route performs a regular expression match on alert labels to catch alerts that are related to a list of services.
+  - match:
+      severity: 'warning'
+    receiver: 'slack_alerts_channel'
+  - match:
+      severity: 'critical'
+    receiver: 'devTeam'
+  - match:
+      severity: 'websiteDown'
+    receiver: 'email_managers'
+inhibit_rules:                                    # Inhibition rules allow to mute a set of alerts given that another alert is firing.
+- source_match:
+    alertname: 'CPU_Threshold_Exceeded'
+  target_match:
+    alertname: 'Instance_DOWN'
+  equal: ['instance']
+- source_match:
+  alertname: 'Instance_Low_Memory'
+  target_match:
+  alertname: 'Instance_DOWN'
+  equal: ['instance']
+receivers:
+- name: 'email_devTeam'
+  email_configs:
+  - to: 'dev@example.com'
+  slack_configs:
+  - send_resolved: true
+    channel: '#emergency'
+    text: &quot;&lt;!here&gt; {{ range .Alerts }}\nInstance: {{ .Labels.instance }}\nsummary: {{ .Annotations.summary }}\ndescription: {{ .Annotations.description }}\n {{ end }}&quot;
+- name: 'slack_alerts_channel'
+  slack_configs:
+  - send_resolved: true
+    channel: '#alerts'
+    text: &quot;description: {{ .CommonAnnotations.description }}\nsummary: {{ .CommonAnnotations.summary }}{{ range .Alerts }}\nInstance: {{ .Labels.instance }} {{ end }}&quot;
+- name: 'email_managers'
+  email_configs:
+  - to: 'leads@example.com, managers@example.com'
+
+EOF
+
+sudo mv alertmanager.yml /etc/prometheus/
+</code></pre>
+
+<p>alertmanager server will be started and managed by systemd. Create the alertmanager systemd unit file and move it to the systemd system directory:</p>
+
+<pre><code>cat &gt; alertmanager.service &lt;&lt;EOF
+[Unit]
+Description=Prometheus Alert Manager service
+After=network.target auditd.service
+
+[Service]
+Type=simple
+User=prometheus
+ExecStart=/usr/local/bin/alertmanager -config.file=&quot;/etc/prometheus/alertmanager.yml&quot;
+Restart=always
+
+[Install]
+WantedBy=default.target
+
+EOF
+
+sudo mv alertmanager.service /etc/systemd/system/
+</code></pre>
+
+<p>Now enable and start it.</p>
+
+<pre><code class="language-sh">sudo systemctl daemon-reload
+sudo systemctl enable alertmanager
+sudo systemctl start alertmanager
+sudo systemctl status alertmanager --no-pager
+</code></pre>
+
+<p>Now you can access an alertmanager dashboard on default 9093 port.</p>
+
+<h6 id="configuring-prometheus-1-x">Configuring <code>prometheus</code> 1.x</h6>
+
+<p><code>prometheus</code> is the main daemon that will interact with others(<code>alertmanager</code>,<code>blackbox_exporter</code>,<code>node_exporter</code>) to make an intergated monitoring solution. Lets start by configuring alert trigger rules. This file configures pretty generic alert rules, tune it according to your needs.</p>
+
+<pre><code>cat &gt; alert.rules &lt;&lt;EOF
+ALERT CPU_Threshold_Exceeded
+  IF (100 * (1 - avg by(instance)(irate(node_cpu{mode='idle'}[1h])))) &gt; 90
+  FOR 1h
+  LABELS { severity = &quot;critical&quot; }
+  ANNOTATIONS {
+    summary = &quot;Instance {{ $labels.instance }} CPU usage is dangerously high&quot;,
+    description = &quot;This device's CPU usage has exceeded the thresold of 90% with a value of {{ $value }} for 1 hour.&quot;
+  }
+
+ALERT Instance_Low_Memory
+  IF node_memory_MemAvailable &lt; 268435456
+  FOR 10m
+  LABELS { severity = &quot;critical&quot; }
+  ANNOTATIONS {
+    summary = &quot;Instance {{$labels.instance}}: memory low&quot;,
+    description = &quot;{{$labels.instance}} has less than 256M memory available&quot;
+  }
+
+ALERT Disk_USAGE_Thresold_Exceeded
+  IF node_filesystem_free{fstype!~&quot;rootfs|tmpfs|fuse.lxcfs&quot;} / node_filesystem_size{fstype!~&quot;rootfs|tmpfs|fuse.lxcfs&quot;} &lt; 0.10
+  FOR 15m
+  LABELS { severity = &quot;warning&quot; }
+  ANNOTATIONS {
+    summary     = &quot;Instance {{$labels.instance}}: disk {{$labels.instance}} filling up&quot;,
+    description = &quot;{{$labels.device}} mounted on {{$labels.mountpoint}} on {{$labels.instance}} is 90% filled.&quot;
+  }
+
+ ALERT Disk_Will_Fill_In_2_Hours
+  IF predict_linear(node_filesystem_free{fstype!~&quot;rootfs|tmpfs|fuse.lxcfs&quot;, job='aws'}[1h], 2*3600) &lt; 0
+  FOR 20m
+  LABELS { severity = &quot;warning&quot; }
+  ANNOTATIONS {
+    summary     = &quot;Instance {{$labels.instance}}: disk {{$labels.device}} filling up&quot;,
+    description = &quot;{{$labels.device}} mounted on {{$labels.mountpoint}} on {{$labels.instance}} will fill up within 2 hours.&quot;
+  }
+
+ALERT Site_DOWN
+  IF probe_success &lt; 1
+  FOR 2m
+  LABELS {
+    severity=&quot;critical&quot;
+  }
+  ANNOTATIONS {
+    summary = &quot;{{$labels.instance}} is down&quot;,
+   description = &quot;site {{$labels.instance}} is down from 2min.&quot;
+  }
+ALERT Site_DOWN
+  IF probe_success &lt; 1
+  FOR 4m
+  LABELS {
+    severity=&quot;websiteDown&quot;
+  }
+  ANNOTATIONS {
+    summary = &quot;{{$labels.instance}} is down&quot;,
+    description = &quot;site {{$labels.instance}} is down/unreachable.&quot;
+  }
+
+ALERT Instance_DOWN
+  IF up == 0
+  FOR 5m
+  LABELS { severity = &quot;critical&quot; }
+  ANNOTATIONS {
+    summary = &quot;Instance {{$labels.instance}} is down&quot;,
+    description = &quot;{{$labels.instance}} has been down for more than 8 minutes.&quot;
+  }
+
+ALERT Blackbox_Exporter_Down
+  IF count(up{job=&quot;blackbox_site_monitoring&quot;} == 1) &lt; 1
+  FOR 1m
+  LABELS {
+    severity=&quot;warning&quot;
+  }
+  ANNOTATIONS {
+    summary = &quot;blackbox_exporter is not up&quot;,
+    description = &quot;blackbox_exporter is not up for 1min.&quot;
+  }
+
+EOF
+
+mv alert.rules /etc/prometheus/
+</code></pre>
+
+<p>Below file is the <code>prometheus</code> configuration and it tells <code>prometheus</code>, where to scrape the metric data from, when to raise alerts etc. It configures <code>prometheus</code> to scrape aws instances having the tag <code>Monitoring</code> of value <code>enabled</code> and <code>example.com</code>, <code>app.example.com</code> domains to monitor. Customise it to tailor your needs.</p>
+
+<pre><code>cat &gt; prometheus.yml &lt;&lt;EOF
+global:
+  scrape_interval:     15s  # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s  # By default, scrape targets every 15 seconds.
+  external_labels:
+      monitor: 'example-prometheus-monitor'
+
+rule_files:         # Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+   - &quot;/etc/prometheus/alert.rules&quot;
+
+scrape_configs:       # A scrape configuration containing exactly one endpoint to scrape:
+# The job name is added as a label `job=&lt;job_name&gt;` to any timeseries scraped from this config.
+  - job_name: 'prometheus'  # Here it's Prometheus itself.
+    scrape_interval: 10s
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'aws'
+    ec2_sd_configs:
+    # The AWS Region.
+    - region: us-west-2
+      # The AWS API keys. If blank, the environment variables `AWS_ACCESS_KEY_ID`
+      # and `AWS_SECRET_ACCESS_KEY` are used.
+      refresh_interval: 10s
+      port: 9100      # The port to scrape metrics from. If using the public IP address, this must instead be specified in the relabeling rule.
+    relabel_configs:
+    # only scrapes instances with tag &quot;Monitoring&quot; = &quot;enabled&quot;, gives very flexible way to monitor and demonitor without touch this config file.
+    - source_labels: [__meta_ec2_tag_monitoring]
+      regex: 'NaN|Null|Nil'
+      action: drop
+    - source_labels: [__meta_ec2_tag_monitoring]
+      regex: 'enabled'
+      action: keep
+    - source_labels: [__meta_ec2_tag_monitoring]
+      regex: 'disabled'
+      action: drop
+    - source_labels: [__meta_ec2_tag_Name, __meta_ec2_private_ip]
+      target_label: instance
+      separator: ':'
+
+  - job_name: blackbox_site_monitoring
+    scrape_interval: 60s
+    metrics_path: /probe
+    params:
+      module: [http_200_module]
+    static_configs:
+      - targets:
+        - example.com
+        - app.example.com
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: (.*)(:80)?
+        target_label: __param_target
+        replacement: ${1}
+      - source_labels: [__param_target]
+        regex: (.*)
+        target_label: instance
+        replacement: ${1}
+      - source_labels: []
+        regex: .*
+        target_label: __address__
+        replacement: 127.0.0.1:9115    # Blackbox exporter URL.
+
+EOF
+
+mv prometheus.yml /etc/prometheus/
+</code></pre>
+
+<p>Create a directory for prometheus to store data.</p>
+
+<pre><code class="language-sh">sudo mkdir /data/prometheus
+chown prometheus. /data/prmetheus
+</code></pre>
+
+<p>prometheus server will be started and managed by systemd. Create the prometheus systemd unit file and move it to the systemd system directory:</p>
+
+<pre><code>cat &gt; prometheus.service &lt;&lt;EOF
+[Unit]
+Description=Prometheus Monitoring service
+After=network.target auditd.service
+
+[Service]
+Type=simple
+WorkingDirectory=/data/prometheus
+User=prometheus
+ExecStart=/opt/prometheus -config.file=&quot;/etc/prometheus/prometheus.yml&quot; -alertmanager.url=&quot;http://localhost:9093&quot; -storage.local.retention=&quot;1440h&quot;
+Restart=always
+
+[Install]
+WantedBy=default.target
+
+EOF
+
+mv prometheus.service /etc/systemd/system/
+</code></pre>
+
+<p>Now enable and start it.</p>
+
+<pre><code class="language-sh">sudo systemctl daemon-reload
+sudo systemctl enable prometheus
+sudo systemctl start prometheus
+sudo systemctl status prometheus --no-pager
+</code></pre>
+
+<h6 id="configuring-grafana">Configuring Grafana</h6>
+
+<p>As grafana is already installed and running. You can access grafana on port <code>3000</code>. Configure grafana for prometheus using <a href="http://docs.grafana.org/features/datasources/prometheus/#using-prometheus-in-grafana">this guide</a>.
+Now you can configure graphs/dashboards as per your need. But for getting started, import below dashboards using <a href="http://docs.grafana.org/reference/export_import/#importing-a-dashboard">this guide</a>:</p>
+
+<ul>
+<li><a href="https://grafana.com/dashboards/22">https://grafana.com/dashboards/22</a></li>
+<li><a href="https://grafana.com/dashboards/405">https://grafana.com/dashboards/405</a></li>
+</ul>
+
+<p>These two dashboards are excellent for visualizing <code>node_exporter</code> metrics. You can find out more pre-made dashboards <a href="https://grafana.com/dashboards">at here</a>.</p>
+      </article>
+
+      <p>
+        <div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "rahulwa" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+      </p>
+
+      <footer class="site-footer">
+  <span class="owner">©2018 Rahul Sinha</span>
+
+  
+</footer>
+
+
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-105014915-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+
+
+
+    </div>
+
+  
+<script src="https://rahulwa.com/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+  </body>
+</html>
